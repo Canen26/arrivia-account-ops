@@ -138,8 +138,8 @@ async function addAttachmentToWorkItem(workItemId, attachmentUrl, filename) {
 
 async function sendEmails(formData, workItemId, workItemUrl) {
   const requesterEmail = (formData.employeeEmail || '').trim();
-  const recipients = new Set(['Sandra.canen@arrivia.com', 'elizabeth.lampe@arrivia.com']);
-  if (requesterEmail) recipients.add(requesterEmail);
+  const recipients = new Set(['sandra.canen@arrivia.com', 'elizabeth.lampe@arrivia.com']);
+  if (requesterEmail) recipients.add(requesterEmail.toLowerCase());
   const to = Array.from(recipients).map(email => ({ email }));
   const payload = {
     personalizations: [{ to }],

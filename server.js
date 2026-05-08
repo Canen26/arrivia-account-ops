@@ -170,10 +170,10 @@ async function sendEmails(formData, workItemId, workItemUrl) {
   const requesterEmail = (formData.employeeEmail || '').trim();
 
   const recipients = new Set([
-    'Sandra.canen@arrivia.com',
+    'sandra.canen@arrivia.com',
     'elizabeth.lampe@arrivia.com'
   ]);
-  if (requesterEmail) recipients.add(requesterEmail);
+  if (requesterEmail) recipients.add(requesterEmail.toLowerCase());
 
   const to = Array.from(recipients).map(email => ({ email }));
 
