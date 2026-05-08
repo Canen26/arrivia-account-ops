@@ -143,9 +143,10 @@ async function sendEmails(formData, workItemId, workItemUrl) {
   const to = Array.from(recipients).map(email => ({ email }));
   const payload = {
     personalizations: [{ to }],
-    from:    { email: process.env.SMTP_FROM || 'sandra.canen@arrivia.com' },
-    subject: `New Account Operations Form Submitted - ${formData.typeOfRequest || ''}`,
-    content: [{ type: 'text/html', value: buildEmailHtml(formData, workItemId, workItemUrl) }]
+    from:     { email: 'arriviaoperations@gmail.com', name: 'Arrivia Account Operations' },
+    reply_to: { email: 'account.operations@arrivia.com' },
+    subject:  `New Account Operations Form Submitted - ${formData.typeOfRequest || ''}`,
+    content:  [{ type: 'text/html', value: buildEmailHtml(formData, workItemId, workItemUrl) }]
   };
   await axios.post('https://api.sendgrid.com/v3/mail/send', payload, {
     headers: { Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`, 'Content-Type': 'application/json' }
