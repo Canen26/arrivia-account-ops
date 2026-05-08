@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Operations Request Form</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #002E5D;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    .page-wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 28px 20px 22px;
+      border-bottom: 2px solid rgba(255,255,255,.25);
+      margin-bottom: 22px;
+    }
+    .header img.logo {
+      max-height: 100px;
+      max-width: 280px;
+      margin-bottom: 14px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      line-height: 1.25;
+    }
+
+    /* ── Info banner ── */
+    .info-section {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 8px;
+      padding: 16px 20px;
+      line-height: 1.65;
+      margin-bottom: 26px;
+      font-size: .93rem;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      padding: 28px 30px;
+    }
+
+    /* ── Field group ── */
+    .field-group { margin-bottom: 20px; }
+    .field-group label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .field-group .hint {
+      color: rgba(255,255,255,.72);
+      font-size: .84rem;
+      margin-bottom: 7px;
+      line-height: 1.5;
+      font-style: italic;
+    }
+    .field-group input[type="text"],
+    .field-group input[type="email"],
+    .field-group input[type="date"],
+    .field-group select,
+    .field-group textarea {
+      width: 100%;
+      padding: 9px 13px;
+      background: #fff;
+      color: #1a1a2e;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      font-size: .93rem;
+      font-family: inherit;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+      outline: none;
+      border-color: #4da6ff;
+      box-shadow: 0 0 0 3px rgba(77,166,255,.22);
+    }
+    .field-group textarea { min-height: 90px; resize: vertical; }
+    .field-group select { cursor: pointer; }
+
+    /* ── Conditional sections ── */
+    .conditional-section {
+      display: none;
+      border-left: 3px solid rgba(255,255,255,.35);
+      padding-left: 18px;
+      margin-top: 14px;
+    }
+    .conditional-subsection {
+      display: none;
+      border-left: 2px solid rgba(255,255,255,.2);
+      padding-left: 14px;
+      margin-top: 10px;
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,.2);
+      margin: 24px 0;
+    }
+
+    /* ── Required star ── */
+    .req { color: #ff8f8f; margin-left: 2px; }
+
+    /* ── File upload ── */
+    .file-drop {
+      border: 2px dashed rgba(255,255,255,.38);
+      border-radius: 8px;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .18s, background .18s;
+    }
+    .file-drop.drag-over {
+      border-color: rgba(255,255,255,.8);
+      background: rgba(255,255,255,.08);
+    }
+    .file-drop input[type="file"] { display: none; }
+    .file-drop-label {
+      cursor: pointer;
+      display: block;
+      font-size: .9rem;
+      color: rgba(255,255,255,.85);
+    }
+    .file-list { margin-top: 10px; }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,.1);
+      border-radius: 5px;
+      padding: 6px 10px;
+      margin-top: 6px;
+      font-size: .84rem;
+    }
+    .file-item .rm { background: none; border: none; color: #ff8f8f; cursor: pointer; font-size: 1rem; padding: 0 4px; line-height: 1; }
+
+    /* ── Submit button ── */
+    .submit-wrap { text-align: center; margin-top: 28px; }
+    .submit-btn {
+      background: #0070C0;
+      color: #fff;
+      border: none;
+      padding: 13px 52px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: .4px;
+      transition: background .18s, transform .1s;
+    }
+    .submit-btn:hover { background: #005a9e; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { background: #5a7a99; cursor: not-allowed; transform: none; }
+
+    /* ── Alerts ── */
+    .alert {
+      display: none;
+      border-radius: 7px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      line-height: 1.55;
+      font-size: .93rem;
+    }
+    .alert-error {
+      background: rgba(200,0,0,.18);
+      border: 1px solid #cc4444;
+      color: #ffbbbb;
+    }
+    .alert-success {
+      background: rgba(0,160,80,.18);
+      border: 2px solid #00b050;
+      color: #ffffff;
+      text-align: center;
+      padding: 34px 24px;
+    }
+    .alert-success h2 { font-size: 1.45rem; margin-bottom: 12px; }
+    .alert-success p  { opacity: .9; margin-top: 8px; }
+    .alert-success a  { color: #80cfff; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 28px;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.6);
+      font-size: .85rem;
+      letter-spacing: .3px;
+    }
+
+    @media (max-width: 580px) {
+      .header h1  { font-size: 1.25rem; }
+      .form-card  { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <img src="logo.svg" alt="Arrivia" class="logo" onerror="this.style.display='none'">
+    <h1>Account Operations Request Form</h1>
+  </div>
+
+  <!-- ── Info Banner ── -->
+  <div class="info-section">
+    The purpose of this form is to submit any requests needed for Account Operations.
+    This is an internal form only to be used by arrivia employees.
+    Once the request is received an ADO ticket will be created.
+  </div>
+
+  <!-- ── Success Message ── -->
+  <div class="alert alert-success" id="successMsg">
+    <h2>&#10003; Request Submitted Successfully!</h2>
+    <p>Your Account Operations request has been submitted. An ADO ticket has been created and email notifications have been sent.</p>
+    <p id="ticketLink" style="margin-top:14px;font-weight:bold;"></p>
+  </div>
+
+  <!-- ── Error Message ── -->
+  <div class="alert alert-error" id="errorMsg"></div>
+
+  <!-- ════════════════════════════ FORM ════════════════════════════ -->
+  <form id="requestForm" novalidate>
+    <div class="form-card">
+
+      <!-- Arrivia Employee Name -->
+      <div class="field-group">
+        <label for="employeeName">Arrivia Employee Name <span class="req">*</span></label>
+        <div class="hint">Please do not enter customer information here. Please enter your name here. (Arrivia Employee name submitting the form)</div>
+        <input type="text" id="employeeName" name="employeeName" required placeholder="Your full name">
+      </div>
+
+      <!-- Arrivia Employee Email -->
+      <div class="field-group">
+        <label for="employeeEmail">Arrivia Employee Email <span class="req">*</span></label>
+        <div class="hint">Please do not enter customer information here. Please enter your arrivia email address.</div>
+        <input type="email" id="employeeEmail" name="employeeEmail" required placeholder="yourname@arrivia.com">
+      </div>
+
+      <!-- Requesting Department -->
+      <div class="field-group">
+        <label for="requestingDepartment">Requesting Department <span class="req">*</span></label>
+        <select id="requestingDepartment" name="requestingDepartment" required>
+          <option value="">-- Select Department --</option>
+          <option>Account Management</option>
+          <option>Account Operations</option>
+          <option>Business Development</option>
+          <option>Business Intelligence</option>
+          <option>Club Team</option>
+          <option>Cruise Fulfillment</option>
+          <option>Customer Experience</option>
+          <option>Dev Team</option>
+          <option>Enrollments</option>
+          <option>Human Resources</option>
+          <option>Legal</option>
+          <option>Marketing</option>
+          <option>Product Support</option>
+          <option>Sales</option>
+          <option>Service Desk</option>
+          <option>Travel Fulfillment</option>
+          <option>Training</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <!-- Request Title -->
+      <div class="field-group">
+        <label for="requestTitle">Request Title <span class="req">*</span></label>
+        <div class="hint">Should be a brief title of the request. Example: Build New Membership Products for Partner XYZ</div>
+        <input type="text" id="requestTitle" name="requestTitle" required placeholder="Enter a brief request title">
+      </div>
+
+      <!-- Type of Request -->
+      <div class="field-group">
+        <label for="typeOfRequest">Type of Request <span class="req">*</span></label>
+        <select id="typeOfRequest" name="typeOfRequest" required>
+          <option value="">-- Select Type of Request --</option>
+          <option>Add Cert/Currency to Existing Account</option>
+          <option>Audit for Existing Partner</option>
+          <option>Account Correction</option>
+          <option>Affiliate Pin</option>
+          <option>Cert Master Create or Updates</option>
+          <option>Demo/Account Creation Requests</option>
+          <option>Display Option Request</option>
+          <option value="Existing Partner/Enhancements or Changes – Hybrid, Fusion or MemberMaint">Existing Partner/Enhancements or Changes &#8211; Hybrid, Fusion or MemberMaint</option>
+          <option>Membership Product Builds</option>
+          <option>New Partner/New Program - Hybrid, Fusion or MemberMaint</option>
+          <option>Travel Platform SSL or Bindings</option>
+          <option>Travel Platform Existing Club Changes</option>
+          <option>Travel Platform Club or Client Audit</option>
+        </select>
+      </div>
+
+      <!-- ══════════ ADD CERT / CURRENCY ══════════ -->
+      <div class="conditional-section" id="sec-addCert">
+
+        <div class="field-group">
+          <label for="accountNumber">What is the Account Number where the cert/currency is being added? <span class="req">*</span></label>
+          <input type="text" id="accountNumber" name="accountNumber" data-cond placeholder="Enter account number">
+        </div>
+
+        <div class="field-group">
+          <label for="certOrCurrency">Is the request for a certificate or currency? <span class="req">*</span></label>
+          <select id="certOrCurrency" name="certOrCurrency" data-cond>
+            <option value="">-- Select --</option>
+            <option>Add Certificate</option>
+            <option>Add Currency</option>
+          </select>
+        </div>
+
+        <!-- Sub: Certificate -->
+        <div class="conditional-subsection" id="sec-certDetail">
+          <div class="field-group">
+            <label for="certName">What is the certificate name, number or cert master ID? <span class="req">*</span></label>
+            <input type="text" id="certName" name="certName" data-cond placeholder="Certificate name, number, or cert master ID">
+          </div>
+        </div>
+
+        <!-- Sub: Currency -->
+        <div class="conditional-subsection" id="sec-currencyDetail">
+          <div class="field-group">
+            <label for="currencyDetails">What is the currency being added and how much? <span class="req">*</span></label>
+            <div class="hint">Please provide the currency type such as Savings Credits or Reward Credits. If the currency is Savings Credits, be sure to provide the currency name if it is different for the partner/brand the currency is being added to.</div>
+            <textarea id="currencyDetails" name="currencyDetails" data-cond placeholder="Currency type and amount"></textarea>
+          </div>
+        </div>
+
+      </div><!-- /sec-addCert -->
+
+      <!-- ══════════ AUDIT FOR EXISTING PARTNER ══════════ -->
+      <div class="conditional-section" id="sec-auditPartner">
+        <div class="field-group">
+          <label for="auditDetails">Please provide full detail as to what the audit is for and why. <span class="req">*</span></label>
+          <div class="hint">Please provide member ID's, screen shots or repro steps.</div>
+          <textarea id="auditDetails" name="auditDetails" data-cond placeholder="Full audit details"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ ACCOUNT CORRECTION ══════════ -->
+      <div class="conditional-section" id="sec-accountCorrection">
+        <div class="field-group">
+          <label for="crmType">What CRM is the account in? <span class="req">*</span></label>
+          <div class="hint">MemberMaint, Travel Platform (SOR Admin) or Hybrid/Fusion?</div>
+          <input type="text" id="crmType" name="crmType" data-cond placeholder="Enter CRM type">
+        </div>
+        <div class="field-group">
+          <label for="correctionAccountNumber">Please provide the account number. <span class="req">*</span></label>
+          <input type="text" id="correctionAccountNumber" name="correctionAccountNumber" data-cond placeholder="Account number">
+        </div>
+        <div class="field-group">
+          <label for="reproSteps">Please provide repro steps and full details of the issue. <span class="req">*</span></label>
+          <textarea id="reproSteps" name="reproSteps" data-cond placeholder="Repro steps and full details"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ AFFILIATE PIN ══════════ -->
+      <div class="conditional-section" id="sec-affiliatePin">
+        <div class="field-group">
+          <label for="affiliatePinPurpose">What is the purpose of the Affiliate Pin Request? <span class="req">*</span></label>
+          <select id="affiliatePinPurpose" name="affiliatePinPurpose" data-cond>
+            <option value="">-- Select --</option>
+            <option>Create New Affiliate Pin</option>
+            <option>Modify Existing Affiliate Pin</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="memberClassName">Please provide Member Class name and Member Class ID. If MC ID is not available, Member Class Name must be provided. <span class="req">*</span></label>
+          <input type="text" id="memberClassName" name="memberClassName" data-cond placeholder="Member Class name and/or ID">
+        </div>
+        <div class="field-group">
+          <label for="affiliatePinDescription">Please provide a brief description of the purpose of your request. <span class="req">*</span></label>
+          <textarea id="affiliatePinDescription" name="affiliatePinDescription" data-cond placeholder="Brief description"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ CERT MASTER CREATE OR UPDATES ══════════ -->
+      <div class="conditional-section" id="sec-certMaster">
+        <div class="field-group">
+          <label for="certMasterDescription">Please provide a brief description of the purpose of your request. <span class="req">*</span></label>
+          <textarea id="certMasterDescription" name="certMasterDescription" data-cond placeholder="Brief description"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ DEMO / ACCOUNT CREATION ══════════ -->
+      <div class="conditional-section" id="sec-demoAccount">
+        <div class="field-group">
+          <label for="demoClubName">What is the club name for the Demo Accounts? <span class="req">*</span></label>
+          <input type="text" id="demoClubName" name="demoClubName" data-cond placeholder="Club name">
+        </div>
+        <div class="field-group">
+          <label for="demoTierLevel">What tier level is the Demo account? <span class="req">*</span></label>
+          <input type="text" id="demoTierLevel" name="demoTierLevel" data-cond placeholder="Tier level">
+        </div>
+        <div class="field-group">
+          <label for="demoContactInfo">Demo Account contact information. <span class="req">*</span></label>
+          <div class="hint">In order to create a demo account, please provide the following:<br>
+            1. First Name &nbsp; 2. Last Name &nbsp; 3. Phone Number &nbsp; 4. Email address</div>
+          <textarea id="demoContactInfo" name="demoContactInfo" data-cond placeholder="First Name, Last Name, Phone Number, Email address"></textarea>
+        </div>
+        <div class="field-group">
+          <label for="demoAdditionalItems">Do you need any additional Currencies or Certs added to the Demo Account other than the one that comes with the initial enrollment of the tier requested? <span class="req">*</span></label>
+          <textarea id="demoAdditionalItems" name="demoAdditionalItems" data-cond placeholder="Describe any additional currencies or certs needed (or enter None)"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ DISPLAY OPTION REQUEST ══════════ -->
+      <div class="conditional-section" id="sec-displayOption">
+        <div class="field-group">
+          <label for="displayOptionPurpose">What is the purpose of your Display Option Request? <span class="req">*</span></label>
+          <textarea id="displayOptionPurpose" name="displayOptionPurpose" data-cond placeholder="Describe the purpose"></textarea>
+        </div>
+        <div class="field-group">
+          <label for="displayOptionNewOrModify">Do you need a new Display Option Created or Modify an Existing Display Option? <span class="req">*</span></label>
+          <input type="text" id="displayOptionNewOrModify" name="displayOptionNewOrModify" data-cond placeholder="New or Modify?">
+        </div>
+      </div>
+
+      <!-- ══════════ EXISTING PARTNER CHANGES ══════════ -->
+      <div class="conditional-section" id="sec-existingPartner">
+        <div class="field-group">
+          <label for="existingPartnerDescription">Please provide a full description of the existing brand changes. <span class="req">*</span></label>
+          <div class="hint">If there are changes to the program, please provide an updated benefits grid. If there are new or changed domains, logos or other items, please provide a full detailed list of items, domains or logos.</div>
+          <textarea id="existingPartnerDescription" name="existingPartnerDescription" data-cond placeholder="Full description of changes"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ MEMBERSHIP PRODUCT BUILDS ══════════ -->
+      <div class="conditional-section" id="sec-membershipProduct">
+        <div class="field-group">
+          <label for="tierLevels">List all Tier Levels/MemberClass that needs product built. <span class="req">*</span></label>
+          <textarea id="tierLevels" name="tierLevels" data-cond placeholder="List all tier levels / member classes"></textarea>
+        </div>
+        <div class="field-group">
+          <label for="closingTools">Does the product build request need Closing Tools? <span class="req">*</span></label>
+          <select id="closingTools" name="closingTools" data-cond>
+            <option value="">-- Select --</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="payInFull">Does the product build request need Pay in Full Incentives? <span class="req">*</span></label>
+          <select id="payInFull" name="payInFull" data-cond>
+            <option value="">-- Select --</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="dpp">Does the product build request need DPP? <span class="req">*</span></label>
+          <select id="dpp" name="dpp" data-cond>
+            <option value="">-- Select --</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ══════════ NEW PARTNER / NEW PROGRAM ══════════ -->
+      <div class="conditional-section" id="sec-newPartner">
+        <div class="field-group">
+          <label for="accountManager">Who is the account manager? <span class="req">*</span></label>
+          <input type="text" id="accountManager" name="accountManager" data-cond placeholder="Account manager name">
+        </div>
+        <div class="field-group">
+          <label for="partnerName">Who is the partner? <span class="req">*</span></label>
+          <input type="text" id="partnerName" name="partnerName" data-cond placeholder="Partner name">
+        </div>
+        <div class="field-group">
+          <label for="programName">What is the program name? <span class="req">*</span></label>
+          <input type="text" id="programName" name="programName" data-cond placeholder="Program name">
+        </div>
+        <div class="field-group">
+          <label for="membershipSales">Will there be membership sales? <span class="req">*</span></label>
+          <input type="text" id="membershipSales" name="membershipSales" data-cond placeholder="Yes or No, with details">
+        </div>
+        <div class="field-group">
+          <label for="enrollmentSetup">What is the enrollment setup? <span class="req">*</span></label>
+          <select id="enrollmentSetup" name="enrollmentSetup" data-cond>
+            <option value="">-- Select --</option>
+            <option>API</option>
+            <option>FTP</option>
+            <option>SSO</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="nationalMemberClasses">Will the new brand have national member classes? <span class="req">*</span></label>
+          <select id="nationalMemberClasses" name="nationalMemberClasses" data-cond>
+            <option value="">-- Select --</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="hasDomains">Do you have Domains? <span class="req">*</span></label>
+          <select id="hasDomains" name="hasDomains" data-cond>
+            <option value="">-- Select --</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="hasPhoneNumbers">Do you have phone numbers? <span class="req">*</span></label>
+          <select id="hasPhoneNumbers" name="hasPhoneNumbers" data-cond>
+            <option value="">-- Select --</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="newBuildDescription">Please provide a detailed overview of the new build requirements. <span class="req">*</span></label>
+          <div class="hint">Please attach a benefits grid, provide domains, phone numbers, logos and all required items for a new build.</div>
+          <textarea id="newBuildDescription" name="newBuildDescription" data-cond placeholder="Detailed overview of build requirements"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ TRAVEL PLATFORM SSL OR BINDINGS ══════════ -->
+      <div class="conditional-section" id="sec-travelSSL">
+        <div class="field-group">
+          <label for="sslOrBindings">SSL Certificates or Bindings Needed? <span class="req">*</span></label>
+          <select id="sslOrBindings" name="sslOrBindings" data-cond>
+            <option value="">-- Select --</option>
+            <option>SSL Certificates</option>
+            <option>Bindings</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="sslClubIds">Please provide Club ID(s) <span class="req">*</span></label>
+          <input type="text" id="sslClubIds" name="sslClubIds" data-cond placeholder="Club ID(s)">
+        </div>
+        <div class="field-group">
+          <label for="sslUrl">Please provide URL <span class="req">*</span></label>
+          <input type="text" id="sslUrl" name="sslUrl" data-cond placeholder="https://...">
+        </div>
+      </div>
+
+      <!-- ══════════ TRAVEL PLATFORM EXISTING CLUB CHANGES ══════════ -->
+      <div class="conditional-section" id="sec-travelClubChanges">
+        <div class="field-group">
+          <label for="travelChangeType">Please select the purpose of changes or enhancements to an existing Travel Platform Club <span class="req">*</span></label>
+          <select id="travelChangeType" name="travelChangeType" data-cond>
+            <option value="">-- Select --</option>
+            <option>Logo Changes</option>
+            <option>Benefits/Store Changes</option>
+            <option>Theme Settings</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="travelClubIds">Please provide the Club ID(s) for this request. <span class="req">*</span></label>
+          <input type="text" id="travelClubIds" name="travelClubIds" data-cond placeholder="Club ID(s)">
+        </div>
+        <div class="field-group">
+          <label for="travelChangeDescription">Please provide a description of the changes or enhancements needing to be changed. <span class="req">*</span></label>
+          <textarea id="travelChangeDescription" name="travelChangeDescription" data-cond placeholder="Description of changes"></textarea>
+        </div>
+      </div>
+
+      <!-- ══════════ TRAVEL PLATFORM CLUB OR CLIENT AUDIT ══════════ -->
+      <div class="conditional-section" id="sec-travelAudit">
+        <div class="field-group">
+          <label for="auditType">Travel Platform Club or Client Audit <span class="req">*</span></label>
+          <select id="auditType" name="auditType" data-cond>
+            <option value="">-- Select --</option>
+            <option>Audit Club</option>
+            <option>Audit Member Account</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="additionalInfo">Please provide any additional important information regarding your request. <span class="req">*</span></label>
+          <textarea id="additionalInfo" name="additionalInfo" data-cond placeholder="Additional details"></textarea>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Estimated Date of Completion -->
+      <div class="field-group">
+        <label for="estimatedCompletion">Estimated Date of Completion <span class="req">*</span></label>
+        <div class="hint">The date selected is only a request. Please do not confirm any completion dates with partners until Account Operations reviews the request. The scope of the request will need to first be reviewed along with timeline availability of all current requests in queue.</div>
+        <input type="date" id="estimatedCompletion" name="estimatedCompletion" required>
+      </div>
+
+      <!-- Attachments -->
+      <div class="field-group">
+        <label>Attachments <span style="font-weight:normal;opacity:.75;">(optional)</span></label>
+        <div class="hint">Attach any relevant files, screenshots, benefits grids, or documents.</div>
+        <div class="file-drop" id="fileDrop">
+          <label class="file-drop-label" for="fileInput">
+            &#128206; Click to browse files or drag &amp; drop here<br>
+            <span style="font-size:.8rem;opacity:.65;margin-top:4px;display:block;">Multiple files supported</span>
+          </label>
+          <input type="file" id="fileInput" multiple>
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-wrap">
+        <button type="submit" id="submitBtn" class="submit-btn">Submit Request</button>
+      </div>
+
+    </div><!-- /form-card -->
+  </form>
+
+  <!-- ── Footer ── -->
+  <div class="footer">Account Operations Powered by Arrivia</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONDITIONAL SECTION LOGIC
+// ═══════════════════════════════════════════════
+
+const TYPE_SECTION_MAP = {
+  'Add Cert/Currency to Existing Account':                                          'sec-addCert',
+  'Audit for Existing Partner':                                                      'sec-auditPartner',
+  'Account Correction':                                                              'sec-accountCorrection',
+  'Affiliate Pin':                                                                   'sec-affiliatePin',
+  'Cert Master Create or Updates':                                                   'sec-certMaster',
+  'Demo/Account Creation Requests':                                                  'sec-demoAccount',
+  'Display Option Request':                                                          'sec-displayOption',
+  'Existing Partner/Enhancements or Changes – Hybrid, Fusion or MemberMaint':  'sec-existingPartner',
+  'Membership Product Builds':                                                       'sec-membershipProduct',
+  'New Partner/New Program - Hybrid, Fusion or MemberMaint':                        'sec-newPartner',
+  'Travel Platform SSL or Bindings':                                                 'sec-travelSSL',
+  'Travel Platform Existing Club Changes':                                           'sec-travelClubChanges',
+  'Travel Platform Club or Client Audit':                                            'sec-travelAudit'
+};
+
+const ALL_TOP_SECTIONS = Object.values(TYPE_SECTION_MAP);
+
+function setSection(id, visible) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = visible ? 'block' : 'none';
+  el.querySelectorAll('[data-cond]').forEach(input => {
+    input.required = visible;
+    if (!visible) {
+      if (input.tagName === 'SELECT') input.value = '';
+      else input.value = '';
+    }
+  });
+}
+
+document.getElementById('typeOfRequest').addEventListener('change', function () {
+  // Hide all top-level conditional sections
+  ALL_TOP_SECTIONS.forEach(id => setSection(id, false));
+  // Hide sub-sections
+  setSection('sec-certDetail',    false);
+  setSection('sec-currencyDetail', false);
+  const certSel = document.getElementById('certOrCurrency');
+  if (certSel) certSel.value = '';
+
+  // Show the matching section
+  const target = TYPE_SECTION_MAP[this.value];
+  if (target) setSection(target, true);
+});
+
+document.getElementById('certOrCurrency').addEventListener('change', function () {
+  setSection('sec-certDetail',    this.value === 'Add Certificate');
+  setSection('sec-currencyDetail', this.value === 'Add Currency');
+});
+
+// ═══════════════════════════════════════════════
+//  FILE UPLOAD
+// ═══════════════════════════════════════════════
+
+const fileDrop  = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+const fileList  = document.getElementById('fileList');
+let selectedFiles = [];
+
+fileInput.addEventListener('change', () => {
+  addFiles(fileInput.files);
+  fileInput.value = '';
+});
+
+fileDrop.addEventListener('dragover',  e => { e.preventDefault(); fileDrop.classList.add('drag-over'); });
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('drag-over'));
+fileDrop.addEventListener('drop', e => {
+  e.preventDefault();
+  fileDrop.classList.remove('drag-over');
+  addFiles(e.dataTransfer.files);
+});
+
+function addFiles(files) {
+  for (const f of files) {
+    if (!selectedFiles.some(s => s.name === f.name && s.size === f.size)) {
+      selectedFiles.push(f);
+    }
+  }
+  renderFileList();
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i, 1);
+  renderFileList();
+}
+
+function renderFileList() {
+  fileList.innerHTML = selectedFiles.map((f, i) => `
+    <div class="file-item">
+      <span>&#128196; ${escHtml(f.name)} <em style="opacity:.6;">(${fmtSize(f.size)})</em></span>
+      <button type="button" class="rm" onclick="removeFile(${i})" title="Remove">&#10005;</button>
+    </div>`).join('');
+}
+
+function fmtSize(b) {
+  if (b < 1024)     return b + ' B';
+  if (b < 1048576)  return (b/1024).toFixed(1)   + ' KB';
+  return                   (b/1048576).toFixed(1) + ' MB';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════
+//  FORM SUBMISSION
+// ═══════════════════════════════════════════════
+
+document.getElementById('requestForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const errorDiv = document.getElementById('errorMsg');
+  errorDiv.style.display = 'none';
+
+  // Collect values from visible fields only
+  const formData = {};
+
+  this.querySelectorAll('input:not([type="file"]):not([type="submit"]), select, textarea').forEach(el => {
+    if (!el.name || !el.value.trim()) return;
+    if (isHidden(el)) return;
+    formData[el.name] = el.value.trim();
+  });
+
+  // Validate visible required fields
+  const missing = [];
+  this.querySelectorAll('[required]').forEach(el => {
+    if (isHidden(el)) return;
+    if (!el.value.trim()) {
+      const lbl = el.closest('.field-group')?.querySelector('label');
+      missing.push(lbl ? lbl.textContent.replace('*','').trim() : el.name);
+    }
+  });
+
+  if (missing.length) {
+    errorDiv.innerHTML = '<strong>Please fill in all required fields:</strong><br>' +
+      missing.map(m => '&bull; ' + escHtml(m)).join('<br>');
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+
+  // Build multipart payload
+  const payload = new FormData();
+  payload.append('formData', JSON.stringify(formData));
+  selectedFiles.forEach(f => payload.append('attachments', f));
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    const res    = await fetch('/submit', { method: 'POST', body: payload });
+    const result = await res.json();
+
+    if (result.success) {
+      this.style.display = 'none';
+      const successDiv = document.getElementById('successMsg');
+      successDiv.style.display = 'block';
+      if (result.workItemId) {
+        document.getElementById('ticketLink').innerHTML =
+          'ADO Ticket: <a href="' + result.workItemUrl + '" target="_blank">Work Item #' + result.workItemId + '</a>';
+      }
+      successDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      throw new Error(result.error || 'Submission failed.');
+    }
+  } catch (err) {
+    errorDiv.textContent = err.message || 'A network error occurred. Please try again.';
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    btn.disabled = false;
+    btn.textContent = 'Submit Request';
+  }
+});
+
+// Returns true if el is inside a hidden conditional section/subsection
+function isHidden(el) {
+  let node = el.parentElement;
+  while (node) {
+    if ((node.classList.contains('conditional-section') ||
+         node.classList.contains('conditional-subsection')) &&
+        node.style.display === 'none') return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+</script>
+</body>
+</html>
