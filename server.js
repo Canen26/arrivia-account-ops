@@ -76,6 +76,7 @@ const FIELD_ORDER = [
   { key: 'auditType',                  label: 'Audit Type' },
   { key: 'additionalInfo',             label: 'Additional Information' },
   { key: 'otherDescription',           label: 'Request Details' },
+  { key: 'generalNotes',               label: 'Additional Information' },
   // Always last
   { key: 'estimatedCompletion',        label: 'Estimated Date of Completion' }
 ];
