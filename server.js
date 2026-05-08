@@ -167,37 +167,30 @@ async function addAttachmentToWorkItem(workItemId, attachmentUrl, filename) {
 }
 
 async function sendEmails(formData, workItemId, workItemUrl) {
-  const transporter = nodemailer.createTransport({
-    host:              process.env.SMTP_HOST || 'smtp.office365.com',
-    port:              parseInt(process.env.SMTP_PORT || '587'),
-    secure:            process.env.SMTP_SECURE === 'true',
-    connectionTimeout: 15000,
-    greetingTimeout:   10000,
-    socketTimeout:     15000,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-
-  const typeOfRequest  = formData.typeOfRequest || '';
   const requesterEmail = (formData.employeeEmail || '').trim();
 
-  const to = new Set([
+  const recipients = new Set([
     'Sandra.canen@arrivia.com',
     'elizabeth.lampe@arrivia.com'
   ]);
+  if (requesterEmail) recipients.add(requesterEmail);
 
-  if (requesterEmail) {
-    to.add(requesterEmail);
-  }
+  const to = Array.from(recipients).map(email => ({ email }));
 
-  await transporter.sendMail({
-    from:    process.env.SMTP_FROM || process.env.SMTP_USER,
-    to:      Array.from(to).join(', '),
-    subject: `New Account Operations Form Submitted - ${typeOfRequest}`,
-    html:    buildEmailHtml(formData, workItemId, workItemUrl)
+  const payload = {
+    personalizations: [{ to }],
+    from:    { email: process.env.SMTP_FROM || 'sandra.canen@arrivia.com' },
+    subject: `New Account Operations Form Submitted - ${formData.typeOfRequest || ''}`,
+    content: [{ type: 'text/html', value: buildEmailHtml(formData, workItemId, workItemUrl) }]
+  };
+
+  const { data } = await axios.post('https://api.sendgrid.com/v3/mail/send', payload, {
+    headers: {
+      Authorization:  `Bearer ${process.env.SENDGRID_API_KEY}`,
+      'Content-Type': 'application/json'
+    }
   });
+  return data;
 }
 
 app.post('/submit', upload.array('attachments'), async (req, res) => {
