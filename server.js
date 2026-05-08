@@ -104,10 +104,10 @@ function buildEmailHtml(formData, workItemId, workItemUrl) {
 
   return `
 <div style="font-family:Arial,sans-serif;color:#333;max-width:700px;">
-  <div style="background:#002E5D;color:white;padding:20px 24px;border-radius:6px 6px 0 0;">
+  <div style="background:#002E5D;color:white;padding:20px 24px 28px;border-radius:6px 6px 0 0;">
     <h2 style="margin:0;font-size:1.3rem;">New Account Operations Request</h2>
   </div>
-  <div style="background:#f5f7fa;padding:24px 24px 16px;border:1px solid #dde3ec;border-top:none;">
+  <div style="background:#f5f7fa;padding:28px 24px 18px;border:1px solid #dde3ec;border-top:none;">
     <p style="margin:0;">A new ADO ticket has been created:
       <a href="${workItemUrl}" style="color:#0070C0;font-weight:bold;">Work Item #${workItemId}</a>
     </p>
