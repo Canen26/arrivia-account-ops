@@ -433,7 +433,11 @@
       <div class="conditional-section" id="sec-displayOption">
         <div class="field-group">
           <label for="displayOptionNewOrModify">Do you need a new Display Option Created or Modify an Existing Display Option? <span class="req">*</span></label>
-          <input type="text" id="displayOptionNewOrModify" name="displayOptionNewOrModify" data-cond placeholder="New or Modify?">
+          <select id="displayOptionNewOrModify" name="displayOptionNewOrModify" data-cond>
+            <option value="">-- Select --</option>
+            <option>Create New Display Option</option>
+            <option>Modify Existing Display Option</option>
+          </select>
         </div>
         <div class="field-group">
           <label for="displayOptionPurpose">What is the purpose of your Display Option Request? <span class="req">*</span></label>
