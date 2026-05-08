@@ -73,17 +73,25 @@ const FIELD_ORDER = [
   { key: 'estimatedCompletion',        label: 'Estimated Date of Completion' }
 ];
 
+function formatFieldValue(key, value) {
+  if (key === 'estimatedCompletion' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split('-');
+    return `${m}/${d}/${y}`;
+  }
+  return value.replace(/\n/g, '<br>');
+}
+
 function buildHtmlDescription(formData) {
   return FIELD_ORDER
     .filter(f => formData[f.key])
-    .map(f => `<p><strong>${f.label}:</strong> ${formData[f.key].replace(/\n/g, '<br>')}</p>`)
+    .map(f => `<p><strong>${f.label}:</strong> ${formatFieldValue(f.key, formData[f.key])}</p>`)
     .join('\n');
 }
 
 function buildEmailHtml(formData, workItemId, workItemUrl) {
   const rows = FIELD_ORDER
     .filter(f => formData[f.key])
-    .map(f => `<tr><td style="font-weight:bold;padding:6px 12px 6px 0;vertical-align:top;white-space:nowrap;">${f.label}:</td><td style="padding:6px 0;">${formData[f.key].replace(/\n/g, '<br>')}</td></tr>`)
+    .map(f => `<tr><td style="font-weight:bold;padding:6px 12px 6px 0;vertical-align:top;white-space:nowrap;">${f.label}:</td><td style="padding:6px 0;">${formatFieldValue(f.key, formData[f.key])}</td></tr>`)
     .join('\n');
   return `
 <div style="font-family:Arial,sans-serif;color:#333;max-width:700px;">
