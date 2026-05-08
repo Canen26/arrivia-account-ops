@@ -240,6 +240,7 @@
     <h2>&#10003; Request Submitted Successfully!</h2>
     <p>Your Account Operations request has been submitted. An ADO ticket has been created and email notifications have been sent.</p>
     <p id="ticketLink" style="margin-top:14px;font-weight:bold;"></p>
+    <button type="button" onclick="resetForm()" style="margin-top:22px;background:#0070C0;color:#fff;border:none;padding:11px 36px;font-size:1rem;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:.3px;">Submit a New Request</button>
   </div>
 
   <!-- ── Error Message ── -->
@@ -808,7 +809,8 @@ document.getElementById('requestForm').addEventListener('submit', async function
     const result = await res.json();
 
     if (result.success) {
-      this.style.display = 'none';
+      document.getElementById('requestForm').style.display = 'none';
+      document.querySelector('.info-section').style.display = 'none';
       const successDiv = document.getElementById('successMsg');
       successDiv.style.display = 'block';
       if (result.workItemId) {
@@ -827,6 +829,38 @@ document.getElementById('requestForm').addEventListener('submit', async function
     btn.textContent = 'Submit Request';
   }
 });
+
+// ═══════════════════════════════════════════════
+//  RESET / NEW REQUEST
+// ═══════════════════════════════════════════════
+
+function resetForm() {
+  // Hide success, show info banner and form
+  document.getElementById('successMsg').style.display = 'none';
+  document.querySelector('.info-section').style.display = 'block';
+  const form = document.getElementById('requestForm');
+  form.style.display = 'block';
+  form.reset();
+
+  // Hide all conditional sections
+  ALL_TOP_SECTIONS.forEach(id => setSection(id, false));
+  setSection('sec-certDetail',    false);
+  setSection('sec-currencyDetail', false);
+
+  // Clear file list
+  selectedFiles = [];
+  renderFileList();
+
+  // Reset submit button
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.textContent = 'Submit Request';
+
+  // Hide any error message
+  document.getElementById('errorMsg').style.display = 'none';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // Returns true if el is inside a hidden conditional section/subsection
 function isHidden(el) {
