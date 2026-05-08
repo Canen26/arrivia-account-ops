@@ -89,7 +89,7 @@ function buildEmailHtml(formData, workItemId, workItemUrl) {
   <div style="background:#002E5D;color:white;padding:20px 24px;border-radius:6px 6px 0 0;">
     <h2 style="margin:0;font-size:1.3rem;">New Account Operations Request</h2>
   </div>
-  <div style="background:#f5f7fa;padding:16px 24px;border:1px solid #dde3ec;border-top:none;">
+  <div style="background:#f5f7fa;padding:24px 24px 16px;border:1px solid #dde3ec;border-top:none;">
     <p style="margin:0;">ADO ticket created: <a href="${workItemUrl}" style="color:#0070C0;font-weight:bold;">Work Item #${workItemId}</a></p>
   </div>
   <div style="padding:20px 24px;border:1px solid #dde3ec;border-top:none;border-radius:0 0 6px 6px;">
