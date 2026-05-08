@@ -188,7 +188,8 @@ async function sendEmails(formData, workItemId, workItemUrl) {
     headers: {
       Authorization:  `Bearer ${process.env.SENDGRID_API_KEY}`,
       'Content-Type': 'application/json'
-    }
+    },
+    timeout: 20000
   });
   return data;
 }
@@ -214,11 +215,16 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
       }
     }
 
-    // Respond immediately once the ticket is created; send email in background
-    res.json({ success: true, workItemId, workItemUrl });
+    // Send email and capture result for diagnostics
+    let emailStatus = 'sent';
+    try {
+      await sendEmails(formData, workItemId, workItemUrl);
+    } catch (e) {
+      emailStatus = e.response?.data ? JSON.stringify(e.response.data) : e.message;
+      console.error('Email failed:', emailStatus);
+    }
 
-    sendEmails(formData, workItemId, workItemUrl)
-      .catch(e => console.error('Email failed:', e.message));
+    res.json({ success: true, workItemId, workItemUrl, emailStatus });
   } catch (err) {
     console.error('Submit error:', err.response?.data || err.message);
     res.status(500).json({

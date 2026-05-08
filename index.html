@@ -817,6 +817,10 @@ document.getElementById('requestForm').addEventListener('submit', async function
         document.getElementById('ticketLink').innerHTML =
           'ADO Ticket: <a href="' + result.workItemUrl + '" target="_blank">Work Item #' + result.workItemId + '</a>';
       }
+      if (result.emailStatus && result.emailStatus !== 'sent') {
+        document.getElementById('ticketLink').innerHTML +=
+          '<br><span style="color:#ffcccc;font-size:.85rem;">Email error: ' + result.emailStatus + '</span>';
+      }
       successDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       throw new Error(result.error || 'Submission failed.');
