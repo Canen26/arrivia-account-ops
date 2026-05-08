@@ -314,6 +314,7 @@
           <option>Travel Platform SSL or Bindings</option>
           <option>Travel Platform Existing Club Changes</option>
           <option>Travel Platform Club or Client Audit</option>
+          <option>Other</option>
         </select>
       </div>
 
@@ -586,6 +587,14 @@
         </div>
       </div>
 
+      <!-- ══════════ OTHER ══════════ -->
+      <div class="conditional-section" id="sec-other">
+        <div class="field-group">
+          <label for="otherDescription">Please provide full details description of your request. <span class="req">*</span></label>
+          <textarea id="otherDescription" name="otherDescription" data-cond placeholder="Full details of your request"></textarea>
+        </div>
+      </div>
+
       <!-- ══════════ TRAVEL PLATFORM CLUB OR CLIENT AUDIT ══════════ -->
       <div class="conditional-section" id="sec-travelAudit">
         <div class="field-group">
@@ -656,7 +665,8 @@ const TYPE_SECTION_MAP = {
   'New Partner/New Program - Hybrid, Fusion or MemberMaint':                        'sec-newPartner',
   'Travel Platform SSL or Bindings':                                                 'sec-travelSSL',
   'Travel Platform Existing Club Changes':                                           'sec-travelClubChanges',
-  'Travel Platform Club or Client Audit':                                            'sec-travelAudit'
+  'Travel Platform Club or Client Audit':                                            'sec-travelAudit',
+  'Other':                                                                            'sec-other'
 };
 
 const ALL_TOP_SECTIONS = Object.values(TYPE_SECTION_MAP);

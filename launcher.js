@@ -68,6 +68,7 @@ const FIELD_ORDER = [
   { key: 'travelChangeDescription',    label: 'Description of Changes' },
   { key: 'auditType',                  label: 'Audit Type' },
   { key: 'additionalInfo',             label: 'Additional Information' },
+  { key: 'otherDescription',           label: 'Request Details' },
   { key: 'estimatedCompletion',        label: 'Estimated Date of Completion' }
 ];
 
