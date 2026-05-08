@@ -148,7 +148,7 @@ async function sendEmails(formData, workItemId, workItemUrl) {
   });
   const requesterEmail = (formData.employeeEmail || '').trim();
   const to = new Set(['Sandra.canen@arrivia.com', 'elizabeth.lampe@arrivia.com']);
-  if (requesterEmail.toLowerCase().endsWith('@arrivia.com')) to.add(requesterEmail);
+  if (requesterEmail) to.add(requesterEmail);
   await transporter.sendMail({
     from:    process.env.SMTP_FROM || process.env.SMTP_USER,
     to:      Array.from(to).join(', '),

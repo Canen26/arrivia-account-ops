@@ -188,7 +188,7 @@ async function sendEmails(formData, workItemId, workItemUrl) {
     'elizabeth.lampe@arrivia.com'
   ]);
 
-  if (requesterEmail.toLowerCase().endsWith('@arrivia.com')) {
+  if (requesterEmail) {
     to.add(requesterEmail);
   }
 
