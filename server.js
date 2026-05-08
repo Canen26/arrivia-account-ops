@@ -167,9 +167,12 @@ async function addAttachmentToWorkItem(workItemId, attachmentUrl, filename) {
 
 async function sendEmails(formData, workItemId, workItemUrl) {
   const transporter = nodemailer.createTransport({
-    host:   process.env.SMTP_HOST || 'smtp.office365.com',
-    port:   parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
+    host:              process.env.SMTP_HOST || 'smtp.office365.com',
+    port:              parseInt(process.env.SMTP_PORT || '587'),
+    secure:            process.env.SMTP_SECURE === 'true',
+    connectionTimeout: 15000,
+    greetingTimeout:   10000,
+    socketTimeout:     15000,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
@@ -217,9 +220,11 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
       }
     }
 
-    await sendEmails(formData, workItemId, workItemUrl);
-
+    // Respond immediately once the ticket is created; send email in background
     res.json({ success: true, workItemId, workItemUrl });
+
+    sendEmails(formData, workItemId, workItemUrl)
+      .catch(e => console.error('Email failed:', e.message));
   } catch (err) {
     console.error('Submit error:', err.response?.data || err.message);
     res.status(500).json({

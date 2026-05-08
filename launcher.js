@@ -137,9 +137,12 @@ async function addAttachmentToWorkItem(workItemId, attachmentUrl, filename) {
 
 async function sendEmails(formData, workItemId, workItemUrl) {
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.office365.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
+    host:              process.env.SMTP_HOST || 'smtp.office365.com',
+    port:              parseInt(process.env.SMTP_PORT || '587'),
+    secure:            process.env.SMTP_SECURE === 'true',
+    connectionTimeout: 15000,
+    greetingTimeout:   10000,
+    socketTimeout:     15000,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
   });
   const requesterEmail = (formData.employeeEmail || '').trim();
@@ -168,8 +171,8 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
         await addAttachmentToWorkItem(id, att.url, file.originalname);
       } catch (e) { console.error(`Attachment failed: ${e.message}`); }
     }
-    await sendEmails(formData, id, url);
     res.json({ success: true, workItemId: id, workItemUrl: url });
+    sendEmails(formData, id, url).catch(e => console.error('Email failed:', e.message));
   } catch (err) {
     console.error('Submit error:', err.response?.data || err.message);
     res.status(500).json({ success: false, error: 'Submission failed. Please contact Account Operations.' });
