@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Operations — Submission Monitor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #001d3d;
+      color: #e8edf5;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #002E5D;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(255,255,255,.15);
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header img  { height: 44px; }
+    .header h1   { font-size: 1.2rem; font-weight: 700; letter-spacing: .4px; }
+    .header-sub  { font-size: .8rem; opacity: .65; margin-top: 2px; }
+    .refresh-info { font-size: .78rem; opacity: .55; text-align: right; }
+
+    /* ── Login ── */
+    .login-wrap {
+      display: flex; align-items: center; justify-content: center;
+      min-height: calc(100vh - 80px);
+    }
+    .login-card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 10px;
+      padding: 36px 40px;
+      width: 340px;
+      text-align: center;
+    }
+    .login-card h2 { font-size: 1.1rem; margin-bottom: 20px; }
+    .login-card input {
+      width: 100%; padding: 10px 14px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 6px; color: #fff;
+      font-size: .95rem; margin-bottom: 14px;
+    }
+    .login-card input::placeholder { color: rgba(255,255,255,.4); }
+    .login-card button {
+      width: 100%; padding: 11px;
+      background: #0070C0; color: #fff; border: none;
+      border-radius: 6px; font-size: .95rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .login-card button:hover { background: #005a9e; }
+    .login-error { color: #ff8f8f; font-size: .83rem; margin-top: 10px; }
+
+    /* ── Dashboard ── */
+    .dashboard { display: none; padding: 28px 32px; }
+
+    /* ── Stats bar ── */
+    .stats {
+      display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .stat-card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 14px 22px;
+      min-width: 160px;
+    }
+    .stat-card .stat-label { font-size: .75rem; opacity: .6; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; margin-top: 4px; }
+    .stat-card.warn .stat-value { color: #ffb347; }
+    .stat-card.danger .stat-value { color: #ff6b6b; }
+    .stat-card.ok .stat-value { color: #5eca8a; }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .table-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      font-weight: 700; font-size: .9rem;
+    }
+    .filter-wrap { display: flex; gap: 8px; align-items: center; }
+    .filter-wrap select {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 5px; color: #fff;
+      padding: 5px 10px; font-size: .82rem; cursor: pointer;
+    }
+    .filter-wrap select option { background: #002E5D; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: rgba(255,255,255,.08); }
+    th {
+      padding: 10px 14px; text-align: left;
+      font-size: .78rem; text-transform: uppercase;
+      letter-spacing: .5px; opacity: .7;
+      white-space: nowrap;
+    }
+    td {
+      padding: 11px 14px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      vertical-align: middle;
+      font-size: .85rem;
+    }
+    tr:hover td { background: rgba(255,255,255,.04); }
+
+    /* ── Status badges ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: .77rem; font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-ok     { background: rgba(94,202,138,.18); color: #5eca8a; border: 1px solid rgba(94,202,138,.3); }
+    .badge-fail   { background: rgba(255,107,107,.18); color: #ff6b6b; border: 1px solid rgba(255,107,107,.3); }
+    .badge-warn   { background: rgba(255,179,71,.18);  color: #ffb347; border: 1px solid rgba(255,179,71,.3); }
+
+    .ado-link { color: #4da6ff; text-decoration: none; font-weight: 600; }
+    .ado-link:hover { text-decoration: underline; }
+
+    .empty-state {
+      text-align: center; padding: 48px 20px;
+      opacity: .45; font-size: .9rem;
+    }
+
+    .tooltip-wrap { position: relative; display: inline-block; }
+    .tooltip-wrap .tooltip-text {
+      display: none; position: absolute; bottom: 125%; left: 50%;
+      transform: translateX(-50%);
+      background: #1a2a3a; border: 1px solid rgba(255,255,255,.2);
+      border-radius: 5px; padding: 6px 10px;
+      font-size: .75rem; white-space: pre-wrap; max-width: 280px;
+      z-index: 10; color: #ff8f8f; line-height: 1.4;
+    }
+    .tooltip-wrap:hover .tooltip-text { display: block; }
+
+    @media (max-width: 900px) {
+      .header { padding: 14px 16px; }
+      .dashboard { padding: 16px; }
+      td, th { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="logo.svg" alt="Arrivia" onerror="this.style.display='none'">
+    <div>
+      <h1>Submission Monitor</h1>
+      <div class="header-sub">Account Operations Request Form</div>
+    </div>
+  </div>
+  <div class="refresh-info" id="refreshInfo">Auto-refreshes every 60 seconds</div>
+</div>
+
+<!-- ── Login ── -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h2>Monitor Access</h2>
+    <input type="password" id="keyInput" placeholder="Enter access key" autocomplete="off">
+    <button onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── Dashboard ── -->
+<div class="dashboard" id="dashboard">
+
+  <div class="stats">
+    <div class="stat-card ok">
+      <div class="stat-label">Total Submissions</div>
+      <div class="stat-value" id="statTotal">—</div>
+    </div>
+    <div class="stat-card ok">
+      <div class="stat-label">ADO Tickets Created</div>
+      <div class="stat-value" id="statAdo">—</div>
+    </div>
+    <div class="stat-card ok">
+      <div class="stat-label">Emails Sent</div>
+      <div class="stat-value" id="statEmail">—</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label">ADO Failures</div>
+      <div class="stat-value" id="statAdoFail">—</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label">Email Failures</div>
+      <div class="stat-value" id="statEmailFail">—</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <span>Submission Log</span>
+      <div class="filter-wrap">
+        <select id="filterStatus" onchange="applyFilter()">
+          <option value="all">All Submissions</option>
+          <option value="ado_fail">ADO Failures</option>
+          <option value="email_fail">Email Failures</option>
+          <option value="any_fail">Any Failure</option>
+          <option value="ok">Fully Successful</option>
+        </select>
+      </div>
+    </div>
+
+    <table id="subTable">
+      <thead>
+        <tr>
+          <th>Date Submitted</th>
+          <th>Employee Name</th>
+          <th>Employee Email</th>
+          <th>Request Title</th>
+          <th>ADO Ticket</th>
+          <th>ADO Status</th>
+          <th>Email Status</th>
+        </tr>
+      </thead>
+      <tbody id="subBody">
+        <tr><td colspan="7" class="empty-state">Loading submissions…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+let monitorKey = localStorage.getItem('monitorKey') || '';
+let allData    = [];
+let refreshTimer;
+
+function doLogin() {
+  monitorKey = document.getElementById('keyInput').value.trim();
+  loadData();
+}
+
+document.getElementById('keyInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const yy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${mm}/${dd}/${yy} ${hh}:${mi}`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadData() {
+  try {
+    const resp = await fetch(`/api/submissions?key=${encodeURIComponent(monitorKey)}`);
+    if (resp.status === 401) {
+      document.getElementById('loginError').textContent = 'Invalid access key. Please try again.';
+      return;
+    }
+    localStorage.setItem('monitorKey', monitorKey);
+    allData = await resp.json();
+    document.getElementById('loginWrap').style.display  = 'none';
+    document.getElementById('dashboard').style.display  = 'block';
+    renderDashboard();
+    scheduleRefresh();
+  } catch (e) {
+    document.getElementById('loginError').textContent = 'Connection error. Please try again.';
+  }
+}
+
+function renderDashboard() {
+  const filter = document.getElementById('filterStatus').value;
+
+  const filtered = allData.filter(s => {
+    if (filter === 'ado_fail')   return !s.adoSuccess;
+    if (filter === 'email_fail') return s.adoSuccess && !s.emailSuccess;
+    if (filter === 'any_fail')   return !s.adoSuccess || !s.emailSuccess;
+    if (filter === 'ok')         return s.adoSuccess && s.emailSuccess;
+    return true;
+  });
+
+  // Stats
+  document.getElementById('statTotal').textContent     = allData.length;
+  document.getElementById('statAdo').textContent       = allData.filter(s => s.adoSuccess).length;
+  document.getElementById('statEmail').textContent     = allData.filter(s => s.emailSuccess).length;
+  document.getElementById('statAdoFail').textContent   = allData.filter(s => !s.adoSuccess).length;
+  document.getElementById('statEmailFail').textContent = allData.filter(s => s.adoSuccess && !s.emailSuccess).length;
+
+  // Colour stat cards
+  const adoFailCount   = allData.filter(s => !s.adoSuccess).length;
+  const emailFailCount = allData.filter(s => s.adoSuccess && !s.emailSuccess).length;
+  document.querySelector('#statAdoFail').closest('.stat-card').className   = 'stat-card ' + (adoFailCount   > 0 ? 'danger' : 'ok');
+  document.querySelector('#statEmailFail').closest('.stat-card').className = 'stat-card ' + (emailFailCount > 0 ? 'danger' : 'ok');
+
+  // Table
+  const tbody = document.getElementById('subBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No submissions match the selected filter.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(s => {
+    const adoBadge = s.adoSuccess
+      ? `<span class="badge badge-ok">&#10003; Created</span>`
+      : `<div class="tooltip-wrap"><span class="badge badge-fail">&#10007; Failed</span><div class="tooltip-text">${escHtml(s.adoError || 'Unknown error')}</div></div>`;
+
+    const emailBadge = s.emailSuccess
+      ? `<span class="badge badge-ok">&#10003; Sent</span>`
+      : `<div class="tooltip-wrap"><span class="badge badge-fail">&#10007; Failed</span><div class="tooltip-text">${escHtml(s.emailError || 'Unknown error')}</div></div>`;
+
+    const adoCell = s.adoId
+      ? `<a class="ado-link" href="${escHtml(s.adoUrl)}" target="_blank">#${s.adoId}</a>`
+      : '<span style="opacity:.4;">—</span>';
+
+    return `<tr>
+      <td>${formatDate(s.submittedAt)}</td>
+      <td>${escHtml(s.employeeName  || '—')}</td>
+      <td>${escHtml(s.employeeEmail || '—')}</td>
+      <td>${escHtml(s.requestTitle  || '—')}</td>
+      <td>${adoCell}</td>
+      <td>${adoBadge}</td>
+      <td>${emailBadge}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('refreshInfo').textContent =
+    'Last updated: ' + formatDate(new Date().toISOString()) + ' · Auto-refreshes every 60s';
+}
+
+function applyFilter() { renderDashboard(); }
+
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(async () => {
+    try {
+      const resp = await fetch(`/api/submissions?key=${encodeURIComponent(monitorKey)}`);
+      if (resp.ok) { allData = await resp.json(); renderDashboard(); }
+    } catch(e) {}
+    scheduleRefresh();
+  }, 60000);
+}
+
+// Auto-try saved key on load
+if (monitorKey) loadData();
+</script>
+</body>
+</html>

@@ -9,6 +9,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// In-memory submission log (holds up to 500 entries; resets on server restart)
+const submissions = [];
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 const ADO_ORG = 'arrivia';
@@ -205,43 +208,66 @@ async function sendEmails(formData, workItemId, workItemUrl) {
 }
 
 app.post('/submit', upload.array('attachments'), async (req, res) => {
-  try {
-    const formData = JSON.parse(req.body.formData || '{}');
-    const files    = req.files || [];
+  const formData = JSON.parse(req.body.formData || '{}');
 
+  const log = {
+    id:            Date.now(),
+    submittedAt:   new Date().toISOString(),
+    employeeName:  formData.employeeName  || '',
+    employeeEmail: formData.employeeEmail || '',
+    requestTitle:  formData.requestTitle  || '',
+    typeOfRequest: formData.typeOfRequest || '',
+    adoId:         null,
+    adoUrl:        null,
+    adoSuccess:    false,
+    adoError:      null,
+    emailSuccess:  false,
+    emailError:    null
+  };
+  submissions.unshift(log);
+  if (submissions.length > 500) submissions.pop();
+
+  try {
+    const files       = req.files || [];
     const title       = formData.requestTitle || 'New Account Operations Request';
     const description = buildHtmlDescription(formData);
 
     const workItem    = await createWorkItem(title, description);
-    const workItemId  = workItem.id;
-    const workItemUrl = `https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_workitems/edit/${workItemId}`;
+    log.adoId      = workItem.id;
+    log.adoUrl     = `https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_workitems/edit/${workItem.id}`;
+    log.adoSuccess = true;
 
     for (const file of files) {
       try {
         const att = await uploadAttachment(file.originalname, file.buffer);
-        await addAttachmentToWorkItem(workItemId, att.url, file.originalname);
+        await addAttachmentToWorkItem(workItem.id, att.url, file.originalname);
       } catch (e) {
         console.error(`Attachment failed (${file.originalname}):`, e.message);
       }
     }
 
-    // Send email and capture result for diagnostics
-    let emailStatus = 'sent';
     try {
-      await sendEmails(formData, workItemId, workItemUrl);
+      await sendEmails(formData, workItem.id, log.adoUrl);
+      log.emailSuccess = true;
     } catch (e) {
-      emailStatus = e.response?.data ? JSON.stringify(e.response.data) : e.message;
-      console.error('Email failed:', emailStatus);
+      log.emailError = e.response?.data ? JSON.stringify(e.response.data) : e.message;
+      console.error('Email failed:', log.emailError);
     }
 
-    res.json({ success: true, workItemId, workItemUrl, emailStatus });
+    res.json({ success: true, workItemId: workItem.id, workItemUrl: log.adoUrl,
+               emailStatus: log.emailSuccess ? 'sent' : log.emailError });
   } catch (err) {
-    console.error('Submit error:', err.response?.data || err.message);
-    res.status(500).json({
-      success: false,
-      error:   'Submission failed. Please contact Account Operations directly.'
-    });
+    log.adoError = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+    console.error('Submit error:', log.adoError);
+    res.status(500).json({ success: false, error: 'Submission failed. Please contact Account Operations directly.' });
   }
+});
+
+app.get('/api/submissions', (req, res) => {
+  if (req.query.key !== (process.env.MONITOR_KEY || 'accountops2026')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json(submissions);
 });
 
 const PORT = process.env.PORT || 3000;
