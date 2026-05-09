@@ -4,36 +4,77 @@ const multer = require('multer');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const path = require('path');
-const fs = require('fs');
-
 const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const SUBMISSIONS_FILE = path.join(process.env.DATA_DIR || __dirname, 'submissions.json');
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_TABLE = `${SUPABASE_URL}/rest/v1/submissions`;
 
-function loadSubmissions() {
-  try {
-    if (fs.existsSync(SUBMISSIONS_FILE)) {
-      const data = JSON.parse(fs.readFileSync(SUBMISSIONS_FILE, 'utf8'));
-      return Array.isArray(data) ? data : [];
-    }
-  } catch (e) {
-    console.error('Failed to load submissions file:', e.message);
-  }
-  return [];
+function sbHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_KEY,
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    ...extra
+  };
 }
 
-function saveSubmissions() {
+async function dbLoad() {
   try {
-    fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2));
+    const { data } = await axios.get(`${SUPABASE_TABLE}?order=submitted_at.desc&limit=500`, { headers: sbHeaders() });
+    return data.map(r => ({
+      id:            r.id,
+      submittedAt:   r.submitted_at,
+      employeeName:  r.employee_name,
+      employeeEmail: r.employee_email,
+      requestTitle:  r.request_title,
+      typeOfRequest: r.type_of_request,
+      adoId:         r.ado_id,
+      adoUrl:        r.ado_url,
+      adoSuccess:    r.ado_success,
+      adoError:      r.ado_error,
+      emailSuccess:  r.email_success,
+      emailError:    r.email_error
+    }));
   } catch (e) {
-    console.error('Failed to save submissions file:', e.message);
+    console.error('Failed to load submissions from Supabase:', e.message);
+    return [];
   }
 }
 
-const submissions = loadSubmissions();
-console.log(`Loaded ${submissions.length} submission(s) from ${SUBMISSIONS_FILE}`);
+function dbInsert(log) {
+  return axios.post(SUPABASE_TABLE, {
+    id:            log.id,
+    submitted_at:  log.submittedAt,
+    employee_name: log.employeeName,
+    employee_email: log.employeeEmail,
+    request_title: log.requestTitle,
+    type_of_request: log.typeOfRequest,
+    ado_id:        log.adoId,
+    ado_url:       log.adoUrl,
+    ado_success:   log.adoSuccess,
+    ado_error:     log.adoError,
+    email_success: log.emailSuccess,
+    email_error:   log.emailError
+  }, { headers: sbHeaders({ Prefer: 'return=minimal' }) })
+  .catch(e => console.error('Supabase insert failed:', e.message));
+}
+
+function dbUpdate(log) {
+  return axios.patch(`${SUPABASE_TABLE}?id=eq.${log.id}`, {
+    ado_id:        log.adoId,
+    ado_url:       log.adoUrl,
+    ado_success:   log.adoSuccess,
+    ado_error:     log.adoError,
+    email_success: log.emailSuccess,
+    email_error:   log.emailError
+  }, { headers: sbHeaders({ Prefer: 'return=minimal' }) })
+  .catch(e => console.error('Supabase update failed:', e.message));
+}
+
+let submissions = [];
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -249,7 +290,7 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
   };
   submissions.unshift(log);
   if (submissions.length > 500) submissions.pop();
-  saveSubmissions();
+  dbInsert(log);
 
   try {
     const files       = req.files || [];
@@ -278,13 +319,13 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
       console.error('Email failed:', log.emailError);
     }
 
-    saveSubmissions();
+    dbUpdate(log);
     res.json({ success: true, workItemId: workItem.id, workItemUrl: log.adoUrl,
                emailStatus: log.emailSuccess ? 'sent' : log.emailError });
   } catch (err) {
     log.adoError = err.response?.data ? JSON.stringify(err.response.data) : err.message;
     console.error('Submit error:', log.adoError);
-    saveSubmissions();
+    dbUpdate(log);
     res.status(500).json({ success: false, error: 'Submission failed. Please contact Account Operations directly.' });
   }
 });
@@ -301,4 +342,8 @@ app.get('/api/submissions', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+dbLoad().then(rows => {
+  submissions.push(...rows);
+  console.log(`Loaded ${submissions.length} submission(s) from Supabase`);
+  app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+});
