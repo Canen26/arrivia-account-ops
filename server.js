@@ -4,13 +4,36 @@ const multer = require('multer');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// In-memory submission log (holds up to 500 entries; resets on server restart)
-const submissions = [];
+const SUBMISSIONS_FILE = path.join(process.env.DATA_DIR || __dirname, 'submissions.json');
+
+function loadSubmissions() {
+  try {
+    if (fs.existsSync(SUBMISSIONS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(SUBMISSIONS_FILE, 'utf8'));
+      return Array.isArray(data) ? data : [];
+    }
+  } catch (e) {
+    console.error('Failed to load submissions file:', e.message);
+  }
+  return [];
+}
+
+function saveSubmissions() {
+  try {
+    fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2));
+  } catch (e) {
+    console.error('Failed to save submissions file:', e.message);
+  }
+}
+
+const submissions = loadSubmissions();
+console.log(`Loaded ${submissions.length} submission(s) from ${SUBMISSIONS_FILE}`);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -226,6 +249,7 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
   };
   submissions.unshift(log);
   if (submissions.length > 500) submissions.pop();
+  saveSubmissions();
 
   try {
     const files       = req.files || [];
@@ -254,11 +278,13 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
       console.error('Email failed:', log.emailError);
     }
 
+    saveSubmissions();
     res.json({ success: true, workItemId: workItem.id, workItemUrl: log.adoUrl,
                emailStatus: log.emailSuccess ? 'sent' : log.emailError });
   } catch (err) {
     log.adoError = err.response?.data ? JSON.stringify(err.response.data) : err.message;
     console.error('Submit error:', log.adoError);
+    saveSubmissions();
     res.status(500).json({ success: false, error: 'Submission failed. Please contact Account Operations directly.' });
   }
 });
