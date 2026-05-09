@@ -263,6 +263,10 @@ app.post('/submit', upload.array('attachments'), async (req, res) => {
   }
 });
 
+app.get('/monitor', (req, res) => {
+  res.sendFile(path.join(__dirname, 'monitor.html'));
+});
+
 app.get('/api/submissions', (req, res) => {
   if (req.query.key !== (process.env.MONITOR_KEY || 'accountops2026')) {
     return res.status(401).json({ error: 'Unauthorized' });
