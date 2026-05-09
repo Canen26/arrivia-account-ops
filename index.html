@@ -323,17 +323,17 @@
       <div class="conditional-section" id="sec-addCert">
 
         <div class="field-group">
-          <label for="accountNumber">What is the Account Number where the cert/currency is being added? <span class="req">*</span></label>
-          <input type="text" id="accountNumber" name="accountNumber" data-cond placeholder="Enter account number">
-        </div>
-
-        <div class="field-group">
           <label for="certOrCurrency">Is the request for a certificate or currency? <span class="req">*</span></label>
           <select id="certOrCurrency" name="certOrCurrency" data-cond>
             <option value="">-- Select --</option>
             <option>Add Certificate</option>
             <option>Add Currency</option>
           </select>
+        </div>
+
+        <div class="field-group">
+          <label for="accountNumber">What is the Account Number where the cert/currency is being added? <span class="req">*</span></label>
+          <input type="text" id="accountNumber" name="accountNumber" data-cond placeholder="Enter account number">
         </div>
 
         <!-- Sub: Certificate -->
