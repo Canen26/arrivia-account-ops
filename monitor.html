@@ -206,7 +206,7 @@
 
   <div class="table-wrap">
     <div class="table-header">
-      <span>Submission Log</span>
+      <span>Submission Log — Last 60 Days</span>
       <div class="filter-wrap">
         <select id="filterStatus" onchange="applyFilter()">
           <option value="all">All Submissions</option>
@@ -286,8 +286,11 @@ async function loadData() {
 
 function renderDashboard() {
   const filter = document.getElementById('filterStatus').value;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 60);
+  const recentData = allData.filter(s => new Date(s.submittedAt) >= cutoff);
 
-  const filtered = allData.filter(s => {
+  const filtered = recentData.filter(s => {
     if (filter === 'ado_fail')   return !s.adoSuccess;
     if (filter === 'email_fail') return s.adoSuccess && !s.emailSuccess;
     if (filter === 'any_fail')   return !s.adoSuccess || !s.emailSuccess;
@@ -296,15 +299,15 @@ function renderDashboard() {
   });
 
   // Stats
-  document.getElementById('statTotal').textContent     = allData.length;
-  document.getElementById('statAdo').textContent       = allData.filter(s => s.adoSuccess).length;
-  document.getElementById('statEmail').textContent     = allData.filter(s => s.emailSuccess).length;
-  document.getElementById('statAdoFail').textContent   = allData.filter(s => !s.adoSuccess).length;
-  document.getElementById('statEmailFail').textContent = allData.filter(s => s.adoSuccess && !s.emailSuccess).length;
+  document.getElementById('statTotal').textContent     = recentData.length;
+  document.getElementById('statAdo').textContent       = recentData.filter(s => s.adoSuccess).length;
+  document.getElementById('statEmail').textContent     = recentData.filter(s => s.emailSuccess).length;
+  document.getElementById('statAdoFail').textContent   = recentData.filter(s => !s.adoSuccess).length;
+  document.getElementById('statEmailFail').textContent = recentData.filter(s => s.adoSuccess && !s.emailSuccess).length;
 
   // Colour stat cards
-  const adoFailCount   = allData.filter(s => !s.adoSuccess).length;
-  const emailFailCount = allData.filter(s => s.adoSuccess && !s.emailSuccess).length;
+  const adoFailCount   = recentData.filter(s => !s.adoSuccess).length;
+  const emailFailCount = recentData.filter(s => s.adoSuccess && !s.emailSuccess).length;
   document.querySelector('#statAdoFail').closest('.stat-card').className   = 'stat-card ' + (adoFailCount   > 0 ? 'danger' : 'ok');
   document.querySelector('#statEmailFail').closest('.stat-card').className = 'stat-card ' + (emailFailCount > 0 ? 'danger' : 'ok');
 
