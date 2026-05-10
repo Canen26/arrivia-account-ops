@@ -217,9 +217,47 @@
       .header h1  { font-size: 1.25rem; }
       .form-card  { padding: 20px 14px; }
     }
+  /* ── Splash screen ── */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #002E5D;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+    transition: opacity .5s ease;
+  }
+  #splash.hidden { opacity: 0; pointer-events: none; }
+  #splash img { height: 60px; }
+  #splash h2 {
+    color: #fff; font-size: 1.2rem; font-weight: 600;
+    letter-spacing: .5px; text-align: center;
+  }
+  .splash-bar-track {
+    width: 260px; height: 6px;
+    background: rgba(255,255,255,.2);
+    border-radius: 99px; overflow: hidden;
+  }
+  .splash-bar-fill {
+    height: 100%; width: 40%;
+    background: #4da6ff;
+    border-radius: 99px;
+    animation: splashSlide 1.4s ease-in-out infinite;
+  }
+  @keyframes splashSlide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(700%); }
+  }
   </style>
 </head>
 <body>
+
+<div id="splash">
+  <img src="logo.svg" alt="Arrivia" onerror="this.style.display='none'">
+  <h2>Account Operations Form Loading…</h2>
+  <div class="splash-bar-track">
+    <div class="splash-bar-fill"></div>
+  </div>
+</div>
 <div class="page-wrapper">
 
   <!-- ── Header ── -->
@@ -883,6 +921,18 @@ function isHidden(el) {
   }
   return false;
 }
+
+// Dismiss splash once page is fully loaded (min 800ms so it doesn't flash)
+const splashEl = document.getElementById('splash');
+const splashStart = Date.now();
+window.addEventListener('load', () => {
+  const elapsed = Date.now() - splashStart;
+  const delay = Math.max(0, 800 - elapsed);
+  setTimeout(() => {
+    splashEl.classList.add('hidden');
+    setTimeout(() => splashEl.remove(), 500);
+  }, delay);
+});
 </script>
 </body>
 </html>
