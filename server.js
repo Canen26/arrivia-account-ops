@@ -166,7 +166,7 @@ function buildHtmlDescription(formData) {
 function buildEmailHtml(formData, workItemId, workItemUrl) {
   const rows = FIELD_ORDER
     .filter(f => formData[f.key])
-    .map(f => `<tr><td style="font-weight:bold;padding:6px 12px 6px 0;vertical-align:top;white-space:nowrap;">${f.label}:</td><td style="padding:6px 0;">${formatFieldValue(f.key, formData[f.key])}</td></tr>`)
+    .map(f => `<tr><td style="font-weight:bold;padding:6px 16px 6px 0;vertical-align:top;white-space:nowrap;width:1%;">${f.label}:</td><td style="padding:6px 0;vertical-align:top;">${formatFieldValue(f.key, formData[f.key])}</td></tr>`)
     .join('\n');
 
   return `
@@ -180,7 +180,7 @@ function buildEmailHtml(formData, workItemId, workItemUrl) {
     </p>
   </div>
   <div style="padding:20px 24px;border:1px solid #dde3ec;border-top:none;border-radius:0 0 6px 6px;">
-    <table style="border-collapse:collapse;width:100%;">
+    <table style="border-collapse:collapse;width:auto;">
       ${rows}
     </table>
   </div>
