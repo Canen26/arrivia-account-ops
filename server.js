@@ -143,6 +143,11 @@ const FIELD_ORDER = [
   { key: 'auditType',                  label: 'Audit Type' },
   { key: 'additionalInfo',             label: 'Additional Information' },
   { key: 'otherDescription',           label: 'Request Details' },
+  // Incorrect Benefits
+  { key: 'ovcPartner',                 label: 'OVC Partner' },
+  { key: 'memberClass',                label: 'Member Class' },
+  { key: 'memberId',                   label: 'Member ID' },
+  { key: 'incorrectBenefitsInfo',      label: 'Additional Information / Repro Steps' },
   { key: 'generalNotes',               label: 'Additional Information' },
   // Always last
   { key: 'estimatedCompletion',        label: 'Estimated Date of Completion' }

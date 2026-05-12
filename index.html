@@ -353,6 +353,7 @@
           <option>Travel Platform SSL or Bindings</option>
           <option>Travel Platform Existing Club Changes</option>
           <option>Travel Platform Club or Client Audit</option>
+          <option>Incorrect Benefits shown on the web site</option>
           <option>Other</option>
         </select>
       </div>
@@ -634,6 +635,27 @@
         </div>
       </div>
 
+      <!-- ══════════ INCORRECT BENEFITS ══════════ -->
+      <div class="conditional-section" id="sec-incorrectBenefits">
+        <div class="field-group">
+          <label for="ovcPartner">What is the OVC Partner? <span class="req">*</span></label>
+          <input type="text" id="ovcPartner" name="ovcPartner" data-cond placeholder="Enter OVC Partner">
+        </div>
+        <div class="field-group">
+          <label for="memberClass">What is the Member Class? <span class="req">*</span></label>
+          <input type="text" id="memberClass" name="memberClass" data-cond placeholder="Enter Member Class">
+        </div>
+        <div class="field-group">
+          <label for="memberId">Please provide the Member ID <span class="req">*</span></label>
+          <input type="text" id="memberId" name="memberId" data-cond placeholder="Enter Member ID">
+        </div>
+        <div class="field-group">
+          <label for="incorrectBenefitsInfo">Please provide any additional important information regarding your error. <span class="req">*</span></label>
+          <div class="hint">Please provide repro steps on how to get to the error or missing information. What page is the error on?</div>
+          <textarea id="incorrectBenefitsInfo" name="incorrectBenefitsInfo" data-cond placeholder="Additional information and repro steps"></textarea>
+        </div>
+      </div>
+
       <!-- ══════════ TRAVEL PLATFORM CLUB OR CLIENT AUDIT ══════════ -->
       <div class="conditional-section" id="sec-travelAudit">
         <div class="field-group">
@@ -711,6 +733,7 @@ const TYPE_SECTION_MAP = {
   'Travel Platform SSL or Bindings':                                                 'sec-travelSSL',
   'Travel Platform Existing Club Changes':                                           'sec-travelClubChanges',
   'Travel Platform Club or Client Audit':                                            'sec-travelAudit',
+  'Incorrect Benefits shown on the web site':                                         'sec-incorrectBenefits',
   'Other':                                                                            'sec-other'
 };
 
